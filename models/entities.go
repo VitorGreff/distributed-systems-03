@@ -5,6 +5,19 @@ type User struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	// Cart     []Product `json:"cart"`
+}
+
+type AuthDto struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserResponse struct {
+	Id    uint64 `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	// Cart  []Product `json:"cart"`
 }
 
 type Product struct {
@@ -18,17 +31,6 @@ type Product_dto struct {
 	Id    uint64  `json:"id"`
 	Name  string  `json:"name"`
 	Price float64 `json:"price"`
-}
-
-type AuthDto struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type UserResponse struct {
-	Id    uint64 `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
 }
 
 func ToUserResponse(users []User) []UserResponse {

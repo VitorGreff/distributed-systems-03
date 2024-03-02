@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 	"trab02/models"
-	"trab02/service01/database"
-	products_repository "trab02/service03/repositories"
+	"trab02/service04/database"
+	products_repository "trab02/service04/repositories"
 	tokenPkg "trab02/token"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -425,12 +425,14 @@ func SendProductRequest(productId uint64) (*models.Product, error) {
 
 	var product models.Product
 	for d := range msgs {
-		log.Println("Response", string(d.Body))
 		if err := json.Unmarshal(d.Body, &product); err != nil {
 			return nil, err
 		} else {
 			break
 		}
+	}
+	if product.Id == 0 {
+		return nil, errors.New("product not found")
 	}
 	return &product, nil
 }
@@ -483,7 +485,7 @@ func ReadAndSendProduct() {
 				continue
 			}
 			log.Printf("Received a message from id: %s", d.Body)
-			db, err := database.InitMySqlConn()
+			db, err := database.InitPsqlConn()
 			if err != nil {
 				sendProduct(ch, nil, "product_queue")
 
@@ -502,12 +504,10 @@ func ReadAndSendProduct() {
 }
 
 func sendProduct(ch *amqp.Channel, product *models.Product, queueName string) {
-	log.Println(product)
-	log.Println(*product)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	body, err := json.Marshal(*product)
+	body, err := json.Marshal(product)
 	if err != nil {
 		log.Println(err)
 	}
@@ -525,5 +525,5 @@ func sendProduct(ch *amqp.Channel, product *models.Product, queueName string) {
 	if err != nil {
 		log.Println(err)
 	}
-	// log.Println("Product sent:", product)
+	log.Println("Product sent:", string(body))
 }

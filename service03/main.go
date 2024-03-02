@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"trab02/service01/database"
-	products_repository "trab02/service03/repositories"
+	"log"
+	"trab02/rabbitMQ"
 )
 
 func main() {
-	db, _ := database.InitMySqlConn()
-	repo := products_repository.NewProductRepository(db)
-	fmt.Println(repo.GetProducts())
+	log.Printf("[ AUTHENTICATION SERVICE N2 ]")
+	log.Printf("[ Waiting for messages. Press CTRL+C to terminate the service ]\n\n")
+	go rabbitMQ.ReceiveAndGenerateToken()
+	go rabbitMQ.ReceiveAndValidateToken()
+	select {}
 }
