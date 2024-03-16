@@ -3,10 +3,10 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	users_repositories "trab02/CrudService01/repositories"
+	"trab02/database"
 	"trab02/models"
 	"trab02/rabbitMQ"
-	"trab02/service01/database"
-	users_repositories "trab02/service01/repositories"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,15 +2,11 @@ package rabbitMQ
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log"
 	"strconv"
 	"strings"
 	"time"
-	"trab02/models"
-	"trab02/service04/database"
-	products_repository "trab02/service04/repositories"
 	tokenPkg "trab02/token"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -95,7 +91,6 @@ func SendAndConsumeToken(token string, userID uint64) error {
 
 	var response string
 	for d := range msgs {
-		log.Println("Response", string(d.Body))
 		response = string(d.Body)
 		break
 	}
@@ -109,6 +104,7 @@ func ReceiveAndValidateToken() {
 	conn, err := prepareRabbitMQ()
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	defer conn.Close()
 
@@ -116,6 +112,7 @@ func ReceiveAndValidateToken() {
 	if err != nil {
 		log.Println(err)
 	}
+
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
@@ -356,174 +353,175 @@ func sendToken(ch *amqp.Channel, queueName string, token string) {
 }
 
 // 3 service
-func SendProductRequest(productId uint64) (*models.Product, error) {
-	conn, err := prepareRabbitMQ()
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
+// func SendProductRequest(productId uint64) (*models.Product_dto, error) {
+// 	conn, err := prepareRabbitMQ()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer conn.Close()
 
-	ch, err := conn.Channel()
-	if err != nil {
-		return nil, errors.New("failed to open a channel: " + err.Error())
-	}
-	defer ch.Close()
+// 	ch, err := conn.Channel()
+// 	if err != nil {
+// 		return nil, errors.New("failed to open a channel: " + err.Error())
+// 	}
+// 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		"product_request",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return nil, errors.New("failed to declare a queue: " + err.Error())
-	}
+// 	q, err := ch.QueueDeclare(
+// 		"product_request",
+// 		false,
+// 		false,
+// 		false,
+// 		false,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		return nil, errors.New("failed to declare a queue: " + err.Error())
+// 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	err = ch.PublishWithContext(
-		ctx,
-		"",
-		q.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(strconv.FormatUint(productId, 10)),
-		},
-	)
-	if err != nil {
-		return nil, errors.New("failed to publish a message: " + err.Error())
-	}
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+// 	err = ch.PublishWithContext(
+// 		ctx,
+// 		"",
+// 		q.Name,
+// 		false,
+// 		false,
+// 		amqp.Publishing{
+// 			ContentType: "text/plain",
+// 			Body:        []byte(strconv.FormatUint(productId, 10)),
+// 		},
+// 	)
+// 	if err != nil {
+// 		return nil, errors.New("failed to publish a message: " + err.Error())
+// 	}
 
-	q2, err := ch.QueueDeclare(
-		"product_queue",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return nil, errors.New("failed to declare a queue: " + err.Error())
-	}
+// 	q2, err := ch.QueueDeclare(
+// 		"product_queue",
+// 		false,
+// 		false,
+// 		false,
+// 		false,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		return nil, errors.New("failed to declare a queue: " + err.Error())
+// 	}
 
-	msgs, err := ch.Consume(
-		q2.Name,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return nil, errors.New("failed to register a consumer: " + err.Error())
-	}
+// 	msgs, err := ch.Consume(
+// 		q2.Name,
+// 		"",
+// 		true,
+// 		false,
+// 		false,
+// 		false,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		return nil, errors.New("failed to register a consumer: " + err.Error())
+// 	}
 
-	var product models.Product
-	for d := range msgs {
-		if err := json.Unmarshal(d.Body, &product); err != nil {
-			return nil, err
-		} else {
-			break
-		}
-	}
-	if product.Id == 0 {
-		return nil, errors.New("product not found")
-	}
-	return &product, nil
-}
-func ReadAndSendProduct() {
-	conn, err := prepareRabbitMQ()
-	if err != nil {
-		log.Println(err)
-	}
-	defer conn.Close()
+// 	var product models.Product_dto
+// 	for d := range msgs {
+// 		if err := json.Unmarshal(d.Body, &product); err != nil {
+// 			return nil, err
+// 		} else {
+// 			break
+// 		}
+// 	}
+// 	if product.Id == 0 {
+// 		return nil, errors.New("product not found")
+// 	}
+// 	return &product, nil
+// }
+// func ReadAndSendProduct() {
+// 	conn, err := prepareRabbitMQ()
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	defer conn.Close()
 
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Println(err)
-	}
-	defer ch.Close()
+// 	ch, err := conn.Channel()
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		"product_request",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Println(err)
-	}
+// 	q, err := ch.QueueDeclare(
+// 		"product_request",
+// 		false,
+// 		false,
+// 		false,
+// 		false,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	msgs, err := ch.Consume(
-		q.Name,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		log.Println(err)
-	}
+// 	msgs, err := ch.Consume(
+// 		q.Name,
+// 		"",
+// 		true,
+// 		false,
+// 		false,
+// 		false,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
 
-	forever := make(chan bool)
+// 	forever := make(chan bool)
 
-	go func() {
-		for d := range msgs {
-			userID, err := strconv.ParseUint(string(d.Body), 10, 64)
-			if err != nil {
-				log.Println("Invalid userID received")
-				sendProduct(ch, nil, "product_queue")
-				continue
-			}
-			log.Printf("Received a message from id: %s", d.Body)
-			db, err := database.InitPsqlConn()
-			if err != nil {
-				sendProduct(ch, nil, "product_queue")
+// 	go func() {
+// 		for d := range msgs {
+// 			userID, err := strconv.ParseUint(string(d.Body), 10, 64)
+// 			if err != nil {
+// 				log.Println("Invalid userID received")
+// 				sendProduct(ch, nil, "product_queue")
+// 				continue
+// 			}
+// 			log.Printf("Received a message from id: %s", d.Body)
+// 			db, err := database.InitPsqlConn()
+// 			if err != nil {
+// 				sendProduct(ch, nil, "product_queue")
 
-			}
-			repo := products_repository.NewProductRepository(db)
-			product, err := repo.GetProduct(userID)
-			repo.DecrementProductQuantity(userID)
-			if err != nil {
-				sendProduct(ch, nil, "product_queue")
-				continue
-			}
-			sendProduct(ch, &product, "product_queue")
-		}
-	}()
-	<-forever
-}
+// 			}
+// 			repo := products_repository.NewProductRepository(db)
+// 			product, err := repo.GetProduct(userID)
+// 			product_response := models.ToProductResponse([]models.Product{product})[0]
+// 			repo.DecrementProductQuantity(userID)
+// 			if err != nil {
+// 				sendProduct(ch, nil, "product_queue")
+// 				continue
+// 			}
+// 			sendProduct(ch, &product_response, "product_queue")
+// 		}
+// 	}()
+// 	<-forever
+// }
 
-func sendProduct(ch *amqp.Channel, product *models.Product, queueName string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+// func sendProduct(ch *amqp.Channel, product *models.Product_dto, queueName string) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
 
-	body, err := json.Marshal(product)
-	if err != nil {
-		log.Println(err)
-	}
-	err = ch.PublishWithContext(
-		ctx,
-		"",
-		queueName,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        body,
-		},
-	)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("Product sent:", string(body))
-}
+// 	body, err := json.Marshal(product)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	err = ch.PublishWithContext(
+// 		ctx,
+// 		"",
+// 		queueName,
+// 		false,
+// 		false,
+// 		amqp.Publishing{
+// 			ContentType: "text/plain",
+// 			Body:        body,
+// 		},
+// 	)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	log.Println("Product sent:", string(body))
+// }

@@ -5,7 +5,6 @@ type User struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	// Cart     []Product `json:"cart"`
 }
 
 type AuthDto struct {
@@ -17,21 +16,20 @@ type UserResponse struct {
 	Id    uint64 `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
-	// Cart  []Product `json:"cart"`
 }
 
-type Product struct {
-	Id       uint64  `json:"id"`
-	Name     string  `json:"name"`
-	Price    float64 `json:"price"`
-	Quantity int     `json:"quantity"`
-}
+// type Product struct {
+// 	Id       uint64  `json:"id"`
+// 	Name     string  `json:"name"`
+// 	Price    float64 `json:"price"`
+// 	Quantity int     `json:"quantity"`
+// }
 
-type Product_dto struct {
-	Id    uint64  `json:"id"`
-	Name  string  `json:"name"`
-	Price float64 `json:"price"`
-}
+// type Product_dto struct {
+// 	Id    uint64  `json:"id"`
+// 	Name  string  `json:"name"`
+// 	Price float64 `json:"price"`
+// }
 
 func ToUserResponse(users []User) []UserResponse {
 	var userResponses []UserResponse
@@ -45,13 +43,13 @@ func ToUserResponse(users []User) []UserResponse {
 	return userResponses
 }
 
-func ToProductResponse(products []Product) []Product_dto {
-	var productResponses []Product_dto
-	for _, product := range products {
-		productResponses = append(productResponses, Product_dto{
-			Name:  product.Name,
-			Price: product.Price,
-		})
-	}
-	return productResponses
-}
+// func ToProductResponse(products []Product) []Product_dto {
+// 	var productResponses []Product_dto
+// 	for _, product := range products {
+// 		productResponses = append(productResponses, Product_dto{
+// 			Name:  product.Name,
+// 			Price: product.Price,
+// 		})
+// 	}
+// 	return productResponses
+// }

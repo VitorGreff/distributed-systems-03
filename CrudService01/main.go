@@ -1,7 +1,7 @@
 package main
 
 import (
-	"trab02/service01/controllers"
+	"trab02/CrudService01/controllers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,5 +14,5 @@ func main() {
 	router.GET("/usuarios/login", controllers.Login)
 	router.DELETE("/usuarios/:id", controllers.DeleteUser)
 	router.PUT("/usuarios/:id", controllers.UpdateUser)
-	router.Run(":8080")
+	router.Run(":8081")
 }

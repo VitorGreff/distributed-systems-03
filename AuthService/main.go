@@ -9,6 +9,5 @@ func main() {
 	log.Printf("[ AUTHENTICATION SERVICE N1 ]")
 	log.Printf("[ Waiting for messages. Press CTRL+C to terminate the service ]\n\n")
 	go rabbitMQ.ReceiveAndGenerateToken()
-	go rabbitMQ.ReceiveAndValidateToken()
-	select {}
+	rabbitMQ.ReceiveAndValidateToken()
 }

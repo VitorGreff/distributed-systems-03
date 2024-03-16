@@ -12,14 +12,15 @@ import (
 )
 
 func InitMySqlConn() (*gorm.DB, error) {
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Println(err)
 		log.Fatal("Couldnt get environment variables")
 	}
-	db_user := os.Getenv("DB_USER")
-	db_pass := os.Getenv("DB_PASSWORD")
-	dsn := fmt.Sprintf("%v:%v@tcp(127.0.0.1:3306)/sd?charset=utf8mb4&parseTime=True&loc=Local", db_user, db_pass)
+	db_user := os.Getenv("MYSQL_USER")
+	db_pass := os.Getenv("MYSQL_PASSWORD")
+	db_host := os.Getenv("MYSQL_HOST")
+	dsn := fmt.Sprintf("%v:%v@tcp(%v)/sd?charset=utf8mb4&parseTime=True&loc=Local", db_user, db_pass, db_host)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Println(err)
